@@ -18,7 +18,7 @@
 #' 
 #' @return An \link{ERWNN-object}.
 #' 
-#' @references Friedman J.H. (2001) "Greedy function approximation: A gradrient boosting machine." \emph{The Annals of Statistics}, 29, 1189-1232.
+#' @references Friedman J.H. (2001) "Greedy function approximation: A gradient boosting machine." \emph{The Annals of Statistics}, 29, 1189-1232.
 #' 
 #' @export
 boost_rwnn <- function(formula, data = NULL, n_hidden = c(), lambda = NULL, B = 100, epsilon = 0.1, method = NULL, type = NULL, control = list()) {
