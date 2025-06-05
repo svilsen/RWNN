@@ -7,6 +7,8 @@ arma::mat sigmoid(const arma::mat & x);
 
 arma::mat tanh(const arma::mat & x);
 
+arma::mat sin(const arma::mat & x);
+
 arma::mat relu(const arma::mat & x);
 
 arma::mat silu(const arma::mat & x);

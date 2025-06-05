@@ -10,6 +10,7 @@ typedef arma::mat (*FnPtr)(const arma::mat &);
 std::map<std::string, FnPtr> activation_map = {
     {"sigmoid", sigmoid},
     {"tanh", tanh},
+    {"sin", sin},
     {"relu", relu},
     {"silu", silu},
     {"softplus", softplus},
@@ -35,7 +36,7 @@ std::vector<arma::mat> rwnn_forward(arma::mat X,
     }
     
     std::vector<arma::mat> H(M); 
-    H[0] = X * W[0];
+    H[0] = activation_map[activation[0]](X * W[0]);
     for (unsigned int m = 1; m < M; m++) {
         arma::mat H_m = H[m - 1];
         

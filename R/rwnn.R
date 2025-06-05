@@ -25,6 +25,7 @@
 #'     \item{\code{"bentidentity"}}{\deqn{f(x) = \frac{\sqrt{x^2 + 1} - 1}{2} + x}}
 #'     \item{\code{"sigmoid"}}{\deqn{f(x) = \frac{1}{1 + \exp(-x)}}}
 #'     \item{\code{"tanh"}}{\deqn{f(x) = \frac{\exp(x) - \exp(-x)}{\exp(x) + \exp(-x)}}}
+#'     \item{\code{"sin"}}{\deqn{f(x) = sin(x)}}
 #'     \item{\code{"relu"}}{\deqn{f(x) = \max\{0, x\}}}
 #'     \item{\code{"silu"} (default)}{\deqn{f(x) = \frac{x}{1 + \exp(-x)}}}
 #'     \item{\code{"softplus"}}{\deqn{f(x) = \ln(1 + \exp(x))}}
@@ -98,8 +99,8 @@ control_rwnn <- function(n_hidden = NULL, n_features = NULL, lnorm = NULL,
         activation <- "silu"
     }
     
-    if (all(!(activation %in% c("sigmoid", "tanh", "relu", "silu", "softplus", "softsign", "sqnl", "gaussian", "sqrbf", "bentidentity", "identity")))) {
-        stop("Invalid activation function detected in 'activation' vector. The implemented activation functions are: 'sigmoid', 'tanh', 'relu', 'silu', 'softplus', 'softsign', 'sqnl', 'gaussian', 'sqrbf', 'bentidentity', and 'identity'.")
+    if (all(!(activation %in% c("sigmoid", "tanh", "sin", "relu", "silu", "softplus", "softsign", "sqnl", "gaussian", "sqrbf", "bentidentity", "identity")))) {
+        stop("Invalid activation function detected in 'activation' vector. The implemented activation functions are: 'sigmoid', 'tanh', 'sin', 'relu', 'silu', 'softplus', 'softsign', 'sqnl', 'gaussian', 'sqrbf', 'bentidentity', and 'identity'.")
     }
     
     if (length(activation) == 1) {

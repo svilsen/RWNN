@@ -26,6 +26,20 @@ arma::mat relu(const arma::mat & x) {
     return y;
 }
 
+arma::mat sin(const arma::mat & x) {
+    int N = x.n_rows;
+    int M = x.n_cols;
+    
+    arma::mat y = x;
+    for (int n = 0; n < N; n++) {
+        for (int m = 0; m < M; m++) {
+            y(n, m) = std::sin(y(n, m));
+        }
+    }
+    
+    return y;
+}
+
 arma::mat silu(const arma::mat & x) {
     return x / (1.0 + arma::exp(-1.0 * x));
 }
