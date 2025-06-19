@@ -2,7 +2,7 @@ Package: RWNN
 Type: Package
 Title: Random Weight Neural Networks
 Version: 0.4.2
-Date: 2025-06-05
+Date: 2025-06-19
 Authors@R: person(given = c("Søren", "B."), family = "Vilsen", role = c("aut", "cre"), email = "svilsen@math.aau.dk") 
 Description: Creation, estimation, and prediction of random weight neural networks (RWNN), Schmidt et al. (1992) <doi:10.1109/ICPR.1992.201708>, including popular variants like extreme learning machines, Huang et al. (2006) <doi:10.1016/j.neucom.2005.12.126>, sparse RWNN, Zhang et al. (2019) <doi:10.1016/j.neunet.2019.01.007>, and deep RWNN, Henríquez et al. (2018) <doi:10.1109/IJCNN.2018.8489703>. It further allows for the creation of ensemble RWNNs like bagging RWNN, Sui et al. (2021) <doi:10.1109/ECCE47101.2021.9595113>, boosting RWNN, stacking RWNN, and ensemble deep RWNN, Shi et al. (2021) <doi:10.1016/j.patcog.2021.107978>.
 License: MIT + file LICENSE

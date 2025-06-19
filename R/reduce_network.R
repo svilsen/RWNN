@@ -955,6 +955,10 @@ reduce_network.RWNN <- function(object, method, retrain = NULL, ...) {
 reduce_network.ERWNN <- function(object, method, retrain = NULL, ...) {
     dots <- list(...)
     
+    if (is.null(dots[["tolerance"]])) {
+        dots[["tolerance"]] <- 1e-8
+    }
+    
     if (method %in% c("stack", "stacking")) {
         if (object$method != "stacking") {
             stop("Setting 'method' to 'stacking' is only meant for stacking ensemble models.")
