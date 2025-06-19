@@ -4,16 +4,15 @@
 
 #### Reducing output-layer
 ##
-reduce_network_output <- function(object, p, tolerance) {
-    # 
+reduce_network_output <- function(object, tolerance) {
+    ##
     if (is.null(tolerance)) {
         tolerance <- 1e-8
     }
     
-    if (any(abs(object$weights$beta) < tolerance)) {
-        # Identifying zeroes
-        zero_index <- which(abs(object$weights$beta) < tolerance)
-        
+    ## Identifying zeroes
+    zero_index <- which(abs(object$weights$beta) < tolerance)
+    if (length(zero_index) > 0) {
         # Removing output bias
         if (object$bias$beta) {
             if (zero_index[1] == 1) {
@@ -24,48 +23,105 @@ reduce_network_output <- function(object, p, tolerance) {
         }
         
         # Silencing input features 
-        k <- as.numeric(object$bias$beta)
-        if (object$combined$X) {
-            k <- k + p
-            if (any(zero_index <= k)) {
-                object$weights$W[[1]][zero_index[zero_index <= k] - as.numeric(object$bias$beta) + as.numeric(object$bias$W[1]), ] <- 0
-            }
-            
-            zero_index <- zero_index[!(zero_index <= k)]
-        } 
+        k <- as.numeric(object$bias$beta) + object$combined$X * (nrow(object$weights$W[[1]]) - object$bias$W[1])
+        zero_index <- zero_index[!(zero_index <= k)]
         
         # Removing weights from hidden layers
         removal_index <- zero_index
-        W <- length(object$weights$W)
-        for (w in seq_len(W)) {
-            k <- k + object$n_hidden[w]
-            removal_index_w <- zero_index[zero_index <= k] - (k - object$n_hidden[w])
-            
-            if (length(removal_index_w) > 0) {
-                if (ncol(object$weights$W[[w]]) == 1) {
-                    removal_index <- removal_index[-which(zero_index <= k)]
-                    zero_index <- zero_index[!(zero_index <= k)]
-                }
-                else {
-                    object$weights$W[[w]] <- object$weights$W[[w]][, -removal_index_w, drop = FALSE]
-                    
-                    if (w < W) {
-                        object$weights$W[[w + 1]] <- object$weights$W[[w + 1]][-(removal_index_w + object$bias$W[w]), , drop = FALSE]
-                    }
-                    
-                    object$n_hidden[w] <- ncol(object$weights$W[[w]])
-                    zero_index <- zero_index[!(zero_index <= k)]
-                }
-            }
-        }
-        
         if (length(removal_index) > 0) {
+            W <- length(object$weights$W)
+            if (object$combined$W) {
+                for (w in seq_len(W)) {
+                    k <- k + object$n_hidden[w]
+                    removal_index_w <- zero_index[zero_index <= k] - (k - object$n_hidden[w])
+                    
+                    if (length(removal_index_w) > 0) {
+                        if (ncol(object$weights$W[[w]]) == 1) {
+                            removal_index <- removal_index[-which(zero_index <= k)]
+                            zero_index <- zero_index[!(zero_index <= k)]
+                        }
+                        else {
+                            object$weights$W[[w]] <- object$weights$W[[w]][, -removal_index_w, drop = FALSE]
+                            
+                            if (w < W) {
+                                object$weights$W[[w + 1]] <- object$weights$W[[w + 1]][-(removal_index_w + object$bias$W[w]), , drop = FALSE]
+                            }
+                            
+                            object$n_hidden[w] <- ncol(object$weights$W[[w]])
+                            zero_index <- zero_index[!(zero_index <= k)]
+                        }
+                    }
+                }
+            } 
+            else {
+                object$weights$W[[W]] <- object$weights$W[[W]][, -(removal_index - k), drop = FALSE]
+                object$n_hidden[W] <- ncol(object$weights$W[[W]])
+            }
+            
             object$weights$beta <- object$weights$beta[-removal_index, , drop = FALSE]
         }
     }
     
     return(object)
 }
+
+##
+reduce_network_hidden <- function(object, tolerance) {
+    ##
+    if (is.null(tolerance)) {
+        tolerance <- 1e-8
+    }
+    
+    ##
+    if (!object$combined$W) {
+        w_total <- length(object$weights$W)
+        for (w in seq_len(w_total)) {
+            ## 
+            if (object$bias$W[w]) {
+                if (sum(abs(object$weights$W[[w]][1, ])) < tolerance) {
+                    object$weights$W[[w]] <- object$weights$W[[w]][-1, , drop = FALSE]
+                    object$bias$W[w] <- FALSE
+                }
+            }
+            
+            ##
+            zero_rows <- which(apply(abs(object$weights$W[[w]]), 1, sum) < tolerance)
+            if (length(zero_rows) > 0) {
+                if (w > 1) {
+                    ##
+                    object$weights$W[[w]] <- object$weights$W[[w]][-zero_rows, , drop = FALSE]
+                    
+                    ##
+                    object$weights$W[[w - 1]] <- object$weights$W[[w - 1]][, -(zero_rows - object$bias$W[w]), drop = FALSE]
+                    object$n_hidden[w - 1] <- object$n_hidden[w - 1] - length(zero_rows)
+                }
+                else {
+                    ## IMPLEMENT REMOVAL FROM TRAINING DATA AND FORMULA?
+                }
+            }
+            
+            ##
+            zero_cols <- which(apply(abs(object$weights$W[[w]]), 2, sum) < tolerance)
+            if (length(zero_cols) > 0) {
+                ##
+                object$weights$W[[w]] <- object$weights$W[[w]][, -zero_cols, drop = FALSE]
+                object$n_hidden[w] <- object$n_hidden[w] - length(zero_cols)
+                
+                if (w < w_total) {
+                    ##
+                    object$weights$W[[w + 1]] <- object$weights$W[[w + 1]][-(zero_cols + object$bias$W[w + 1]), , drop = FALSE]
+                }
+                else {
+                    ##
+                    object$weights$beta <- object$weights$beta[-(zero_cols + object$bias$beta + object$combined$X * (nrow(object$weights$W[[1]]) - object$bias$W[1])), , drop = FALSE]
+                }
+            }
+        }
+    }
+    
+    return(object)
+}
+
 
 #### Reducing the number of weights
 ##
@@ -669,7 +725,7 @@ reduce_network_stack <- function(object, tolerance) {
 #' 
 #' @param object An \link{RWNN-object} or \link{ERWNN-object}.
 #' @param method A string, or a function, setting the method used to reduce the network (see details).
-#' @param retrain TRUE/FALSE: Should the output weights be retrained after reduction (defaults to \code{TRUE})?
+#' @param retrain TRUE/FALSE: Should the output weights be retrained after reduction?
 #' @param ... Additional arguments passed to the reduction method (see details).
 #' 
 #' @details The '\code{method}' and additional arguments required by the method are:
@@ -701,10 +757,15 @@ reduce_network_stack <- function(object, tolerance) {
 #'      \item{\code{p}: The proportion of neurons or weights to remove based on relief scores.}{}
 #'      \item{\code{type}: A string indicating whether neurons (\code{'neuron'}) or weights (\code{'weight'}) should be removed.}{}
 #'   }}
+#'   \item{\code{"hidden"}}{\describe{
+#'      \item{\code{tolerance}: The tolerance used when removing zeroes from the hidden layer(s).}{}
+#'   }}
 #'   \item{\code{"output"}}{\describe{
 #'      \item{\code{tolerance}: The tolerance used when removing zeroes from the output layer.}{}
 #'   }}
 #' } 
+#' 
+#' The argument \code{retrain} should primarily be used when \code{method = "output"}, in this case it defaults to \code{TRUE}, but will default to \code{FALSE} otherwise.
 #' 
 #' If the object is an \link{ERWNN-object}, the reduction is applied to all \link{RWNN-object}'s in the \link{ERWNN-object}. Furthermore, when
 #' the \link{ERWNN-object} is created as a stack and the weights of the stack is trained, then '\code{method}' can be set to:
@@ -730,7 +791,7 @@ reduce_network_stack <- function(object, tolerance) {
 #' Dekhovich A., Tax D.M., Sluiter M.H., Bessa M.A. (2024) "Neural network relief: a pruning algorithm based on neural activity." \emph{Machine Learning}, 113, 2597-2618.
 #' 
 #' @export
-reduce_network <- function(object, method, retrain = TRUE, ...) {
+reduce_network <- function(object, method, retrain = NULL, ...) {
     UseMethod("reduce_network")
 }
 
@@ -740,14 +801,22 @@ reduce_network <- function(object, method, retrain = TRUE, ...) {
 #' @example inst/examples/reduction_example.R
 #'
 #' @export
-reduce_network.RWNN <- function(object, method, retrain = TRUE, ...) {
+reduce_network.RWNN <- function(object, method, retrain = NULL, ...) {
     ##
     dots <- list(...)
     
     ##
     if (is.null(retrain) | !is.logical(retrain)) {
-        warning("'retrain' is set to 'TRUE' as it was either 'NULL', or not 'logical'.")
-        retrain <- TRUE
+        if (method %in% c("output")) {
+            retrain <- TRUE
+        }
+        else {
+            retrain <- FALSE
+        }
+    }
+    
+    if (is.null(dots[["tolerance"]])) {
+        dots[["tolerance"]] <- 1e-8
     }
     
     ##
@@ -794,9 +863,13 @@ reduce_network.RWNN <- function(object, method, retrain = TRUE, ...) {
         ## Neuron and weight pruning method: Reduction based on relief scores.
         object <- reduce_network_relief(object = object, p = dots[["p"]], X = X, type = dots[["type"]])
     }
+    else if (method %in% c("hidden")) {
+        ## Removing '0' weight rows/columns from the hidden-layers.
+        object <- reduce_network_hidden(object = object, tolerance = dots[["tolerance"]])
+    }
     else if (method %in% c("output")) {
         ## Removing '0' weights from the output-layer.
-        object <- reduce_network_output(object = object, p = ncol(X), tolerance = dots[["tolerance"]])
+        object <- reduce_network_output(object = object, tolerance = dots[["tolerance"]])
     } 
     else if (is.function(method)) {
         object_list <- list(object = object, X = X, y = y) |> append(dots)
@@ -806,51 +879,41 @@ reduce_network.RWNN <- function(object, method, retrain = TRUE, ...) {
         stop("'method' is either not implemented, or not a function.")
     }
     
-    ##
-    for (w in seq_along(object$weights$W)) {
+    ## 
+    w <- 1
+    w_total <- length(object$weights$W)
+    while (w <= w_total) {
+        ## Removing biases from hidden layers
         if (object$bias$W[w]) {
-            if (sum(abs(object$weights$W[[w]][1, ])) < 1e-8) {
+            if (all(abs(object$weights$W[[w]][1, ]) < dots[["tolerance"]])) {
                 object$weights$W[[w]] <- object$weights$W[[w]][-1, , drop = FALSE]
                 object$bias$W[w] <- FALSE
             }
         }
         
-        if (all(abs(object$weights$W[[w]]) < 1e-8)) {
+        ## Removing layers in case of complete 'zeroing' of weights
+        idx <- seq_len(nrow(object$weights$W[[w]])) + object$bias$W[w]
+        idx <- idx[idx <= nrow(object$weights$W[[w]])]
+        if (all(abs(object$weights$W[[w]][idx,]) < dots[["tolerance"]])) {
+            if (w == 1) {
+                stop("The applied 'method' have zeroed all weights in the first hidden layer.")
+            }
+            
             object$weights$W <- object$weights$W[seq_len(w - 1)]
             object$bias$W <- object$bias$W[seq_len(w - 1)]
-            
             object$n_hidden <- object$n_hidden[seq_len(w - 1)]
             object$activation <- object$activation[seq_len(w - 1)]
             
-            keep_rows <- ifelse(object$combined$W, sum(object$n_hidden), object$n_hidden[length(object$n_hidden)]) + 
-                sum(object$bias$W) + sum(object$bias$beta) + ncol(X) * sum(object$combined$X)
-            object$weights$beta <- object$weights$beta[seq_len(keep_rows), , drop = FALSE]
+            w_total <- length(object$weights$W)
+            retrain <- TRUE
         }
         
-        if (!object$combined$W) {
-            if (w < length(object$weights$W)) {
-                next_layer_zeroes <- apply(abs(object$weights$W[[w + 1]]), 1, sum)
-                
-                if (as.numeric(object$bias$W[w + 1])) {
-                    next_layer_zeroes <- next_layer_zeroes[-1]
-                }
-                
-                if (length(next_layer_zeroes) == ncol(object$weights$W[[w]])) {
-                    next_layer_zeroes <- next_layer_zeroes[-1]
-                }
-                
-                next_layer_zeroes <- which(next_layer_zeroes < 1e-8)
-                
-                if (length(next_layer_zeroes) > 0) {
-                    object$weights$W[[w]] <- object$weights$W[[w]][-next_layer_zeroes, , drop = FALSE]
-                    object$n_hidden[w] <- object$n_hidden[w] - length(next_layer_zeroes)
-                }
-            }
-        }
+        w <- w + 1
     }
     
-    if (object$bias$beta) { 
-        if (abs(object$weights$beta[1]) < 1e-8) {
+    ## Removing bias from output layer 
+    if (object$bias$beta) {
+        if (abs(object$weights$beta[1]) < dots[["tolerance"]]) {
             object$weights$beta <- object$weights$beta[-1, , drop = FALSE]
             object$bias$beta <- FALSE
         }
@@ -889,7 +952,7 @@ reduce_network.RWNN <- function(object, method, retrain = TRUE, ...) {
 #' @method reduce_network ERWNN
 #' 
 #' @export
-reduce_network.ERWNN <- function(object, method, retrain = TRUE, ...) {
+reduce_network.ERWNN <- function(object, method, retrain = NULL, ...) {
     dots <- list(...)
     
     if (method %in% c("stack", "stacking")) {

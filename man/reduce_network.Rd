@@ -6,18 +6,18 @@
 \alias{reduce_network.ERWNN}
 \title{Reduce the weights of a random weight neural network.}
 \usage{
-reduce_network(object, method, retrain = TRUE, ...)
+reduce_network(object, method, retrain = NULL, ...)
 
-\method{reduce_network}{RWNN}(object, method, retrain = TRUE, ...)
+\method{reduce_network}{RWNN}(object, method, retrain = NULL, ...)
 
-\method{reduce_network}{ERWNN}(object, method, retrain = TRUE, ...)
+\method{reduce_network}{ERWNN}(object, method, retrain = NULL, ...)
 }
 \arguments{
 \item{object}{An \link{RWNN-object} or \link{ERWNN-object}.}
 
 \item{method}{A string, or a function, setting the method used to reduce the network (see details).}
 
-\item{retrain}{TRUE/FALSE: Should the output weights be retrained after reduction (defaults to \code{TRUE})?}
+\item{retrain}{TRUE/FALSE: Should the output weights be retrained after reduction?}
 
 \item{...}{Additional arguments passed to the reduction method (see details).}
 }
@@ -57,10 +57,15 @@ The '\code{method}' and additional arguments required by the method are:
      \item{\code{p}: The proportion of neurons or weights to remove based on relief scores.}{}
      \item{\code{type}: A string indicating whether neurons (\code{'neuron'}) or weights (\code{'weight'}) should be removed.}{}
   }}
+  \item{\code{"hidden"}}{\describe{
+     \item{\code{tolerance}: The tolerance used when removing zeroes from the hidden layer(s).}{}
+  }}
   \item{\code{"output"}}{\describe{
      \item{\code{tolerance}: The tolerance used when removing zeroes from the output layer.}{}
   }}
 } 
+
+The argument \code{retrain} should primarily be used when \code{method = "output"}, in this case it defaults to \code{TRUE}, but will default to \code{FALSE} otherwise.
 
 If the object is an \link{ERWNN-object}, the reduction is applied to all \link{RWNN-object}'s in the \link{ERWNN-object}. Furthermore, when
 the \link{ERWNN-object} is created as a stack and the weights of the stack is trained, then '\code{method}' can be set to:
