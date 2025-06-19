@@ -12,9 +12,10 @@ control_rwnn(
   bias_output = TRUE,
   activation = NULL,
   combine_input = FALSE,
-  combine_hidden = TRUE,
+  combine_hidden = FALSE,
   include_data = TRUE,
   include_estimate = TRUE,
+  boost_schedule = TRUE,
   rng = runif,
   rng_pars = list(min = -1, max = 1)
 )
@@ -39,6 +40,8 @@ control_rwnn(
 \item{include_data}{TRUE/FALSE: Should the original data be included in the returned object? Note: this should almost always be set to '\code{TRUE}', but using '\code{FALSE}' is more memory efficient in \link{ERWNN-object}'s.}
 
 \item{include_estimate}{TRUE/FALSE: Should the \code{rwnn}-function estimate the output parameters? Note: this should almost always be set to '\code{TRUE}', but using '\code{FALSE}'is more memory efficient in \link{ERWNN-object}'s.}
+
+\item{boost_schedule}{TRUE/FALSE: Should the weights used when gradient boosting be reduced over time?}
 
 \item{rng}{A string indicating the sampling distribution used for generating the weights of the hidden layer (defaults to \code{runif}).}
 
@@ -67,7 +70,13 @@ The possible activation functions supplied to '\code{activation}' are:
     \item{\code{"sqrbf"}}{\deqn{f(x) = 1 - \frac{x^2}{2}\text{, if }|x| \le 1\text{, }f(x) = \frac{(2 - |x|)^2}{2}\text{, if }1 < |x| < 2\text{, and }f(x) = 0\text{, if }|x| \ge 2}}
 }
 
-The '\code{rng}' argument can also be set to \code{"orthogonal"}, \code{"torus"}, \code{"halton"}, or \code{"sobol"} for added stability. The \code{"torus"}, \code{"halton"}, and \code{"sobol"} methods relay on the \link[randtoolbox]{torus}, \link[randtoolbox]{halton}, and \link[randtoolbox]{sobol} functions. NB: this is not recommended when creating ensembles.
+If '\code{boost_schedule}' is set to '\code{TRUE}' (default), then the weights applied in a gradient boosting ensemble defined as: 
+\deqn{
+ w_b = \frac{\varepsilon}{b}, \text{ for } b = 1, ..., B
+}  
+where \eqn{\varepsilon} is the learning rate, and \eqn{B} is the total number of models in the ensemble.
+
+The '\code{rng}' argument can also be set to \code{"orthogonal"}, \code{"torus"}, \code{"halton"}, or \code{"sobol"} for added stability. The \code{"torus"}, \code{"halton"}, and \code{"sobol"} are quasi-random number generators, relying on \link[randtoolbox]{torus}, \link[randtoolbox]{halton}, and \link[randtoolbox]{sobol} functions from the \link{randtoolbox} package. NB: this is not recommended when creating ensembles.
 }
 \references{
 Wang W., Liu X. (2017) "The selection of input weights of extreme learning machine: A sample structure preserving point of view." \emph{Neurocomputing}, 261, 28-36.

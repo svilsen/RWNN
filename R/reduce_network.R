@@ -34,7 +34,6 @@ reduce_network_output <- function(object, p, tolerance) {
             zero_index <- zero_index[!(zero_index <= k)]
         } 
         
-        
         # Removing weights from hidden layers
         removal_index <- zero_index
         W <- length(object$weights$W)

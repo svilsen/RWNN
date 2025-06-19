@@ -16,6 +16,7 @@
 #' @param combine_hidden TRUE/FALSE: Should all hidden layers be combined to predict the output?
 #' @param include_data TRUE/FALSE: Should the original data be included in the returned object? Note: this should almost always be set to '\code{TRUE}', but using '\code{FALSE}' is more memory efficient in \link{ERWNN-object}'s.
 #' @param include_estimate TRUE/FALSE: Should the \code{rwnn}-function estimate the output parameters? Note: this should almost always be set to '\code{TRUE}', but using '\code{FALSE}'is more memory efficient in \link{ERWNN-object}'s.
+#' @param boost_schedule TRUE/FALSE: Should the weights used when gradient boosting be reduced over time? 
 #' @param rng A string indicating the sampling distribution used for generating the weights of the hidden layer (defaults to \code{runif}). 
 #' @param rng_pars A list of parameters passed to the \code{rng} function (defaults to \code{list(min = -1, max = 1)}).   
 #' 
@@ -35,7 +36,13 @@
 #'     \item{\code{"sqrbf"}}{\deqn{f(x) = 1 - \frac{x^2}{2}\text{, if }|x| \le 1\text{, }f(x) = \frac{(2 - |x|)^2}{2}\text{, if }1 < |x| < 2\text{, and }f(x) = 0\text{, if }|x| \ge 2}}
 #' }
 #' 
-#' The '\code{rng}' argument can also be set to \code{"orthogonal"}, \code{"torus"}, \code{"halton"}, or \code{"sobol"} for added stability. The \code{"torus"}, \code{"halton"}, and \code{"sobol"} methods relay on the \link[randtoolbox]{torus}, \link[randtoolbox]{halton}, and \link[randtoolbox]{sobol} functions. NB: this is not recommended when creating ensembles. 
+#' If '\code{boost_schedule}' is set to '\code{TRUE}' (default), then the weights applied in a gradient boosting ensemble defined as: 
+#' \deqn{
+#'  w_b = \frac{\varepsilon}{b}, \text{ for } b = 1, ..., B
+#' }  
+#' where \eqn{\varepsilon} is the learning rate, and \eqn{B} is the total number of models in the ensemble.
+#' 
+#' The '\code{rng}' argument can also be set to \code{"orthogonal"}, \code{"torus"}, \code{"halton"}, or \code{"sobol"} for added stability. The \code{"torus"}, \code{"halton"}, and \code{"sobol"} are quasi-random number generators, relying on \link[randtoolbox]{torus}, \link[randtoolbox]{halton}, and \link[randtoolbox]{sobol} functions from the \link{randtoolbox} package. NB: this is not recommended when creating ensembles. 
 #' 
 #' @return A list of control variables.
 #' 
@@ -44,8 +51,9 @@
 #' @export
 control_rwnn <- function(n_hidden = NULL, n_features = NULL, lnorm = NULL,
                          bias_hidden = TRUE, bias_output = TRUE, activation = NULL, 
-                         combine_input = FALSE, combine_hidden = TRUE, 
+                         combine_input = FALSE, combine_hidden = FALSE, 
                          include_data = TRUE, include_estimate = TRUE,
+                         boost_schedule = TRUE, 
                          rng = runif, rng_pars = list(min = -1, max = 1)) {
     #
     if (is.null(lnorm) | !is.character(lnorm)) {
@@ -92,6 +100,11 @@ control_rwnn <- function(n_hidden = NULL, n_features = NULL, lnorm = NULL,
     #
     if (!is.logical(include_estimate)) {
         stop("'include_estimate' has to be 'TRUE'/'FALSE'.")
+    }
+    
+    #
+    if (!is.logical(boost_schedule)) {
+        stop("'boost_schedule' has to be 'TRUE'/'FALSE'.")
     }
     
     #
@@ -142,7 +155,7 @@ control_rwnn <- function(n_hidden = NULL, n_features = NULL, lnorm = NULL,
             bias_hidden = bias_hidden, bias_output = bias_output, activation = activation, 
             combine_input = combine_input, combine_hidden = combine_hidden, 
             include_data = include_data, include_estimate = include_estimate,
-            rng = rng, rng_pars = rng_pars
+            boost_schedule = boost_schedule, rng = rng, rng_pars = rng_pars
         )
     )
 }

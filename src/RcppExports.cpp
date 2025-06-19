@@ -11,6 +11,20 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// loocv
+arma::colvec loocv(const arma::mat& O, const arma::colvec& y, const arma::colvec& b, const double& lambda);
+RcppExport SEXP _RWNN_loocv(SEXP OSEXP, SEXP ySEXP, SEXP bSEXP, SEXP lambdaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< const arma::mat& >::type O(OSEXP);
+    Rcpp::traits::input_parameter< const arma::colvec& >::type y(ySEXP);
+    Rcpp::traits::input_parameter< const arma::colvec& >::type b(bSEXP);
+    Rcpp::traits::input_parameter< const double& >::type lambda(lambdaSEXP);
+    rcpp_result_gen = Rcpp::wrap(loocv(O, y, b, lambda));
+    return rcpp_result_gen;
+END_RCPP
+}
 // importance_score
 arma::mat importance_score(const arma::mat& X, const arma::mat& W);
 RcppExport SEXP _RWNN_importance_score(SEXP XSEXP, SEXP WSEXP) {
@@ -67,6 +81,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_RWNN_loocv", (DL_FUNC) &_RWNN_loocv, 4},
     {"_RWNN_importance_score", (DL_FUNC) &_RWNN_importance_score, 2},
     {"_RWNN_classify_cpp", (DL_FUNC) &_RWNN_classify_cpp, 4},
     {"_RWNN_estimate_output_weights", (DL_FUNC) &_RWNN_estimate_output_weights, 4},

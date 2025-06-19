@@ -61,7 +61,6 @@ stack_rwnn <- function(formula, data = NULL, n_hidden = c(), lambda = NULL, B = 
 
 stack_rwnn_matrix <- function(X, y, n_hidden = c(), lambda = NULL, B = 100, optimise = FALSE, folds = 10, method = NULL, type = NULL, control = list()) {
     ## Checks
-    
     if (is.null(control[["include_data"]])) {
         control$include_data <- FALSE
     }
@@ -72,17 +71,7 @@ stack_rwnn_matrix <- function(X, y, n_hidden = c(), lambda = NULL, B = 100, opti
         stop("'optimise' has to be 'TRUE'/'FALSE'.")
     }
     
-    if (optimise) {
-        if (is.null(folds) || folds < 1) {
-            folds <- 10
-            warning("Note: 'folds' was not supplied and is therefore set to 10.")
-        }
-    } 
-    else {
-        folds <- 1
-    }
-    
-    if (is.null(B) | !is.numeric(B)) {
+    if (is.null(B) | (!is.numeric(B))) {
         B <- 100
         warning("Note: 'B' was not supplied and is therefore set to 100.")
     }
@@ -94,9 +83,18 @@ stack_rwnn_matrix <- function(X, y, n_hidden = c(), lambda = NULL, B = 100, opti
     control$n_hidden <- n_hidden
     control <- do.call(control_rwnn, control)
     
-    ##
     if (optimise) {
-        fold_index <- create_folds(X, folds)
+        if ((is.null(folds) | folds < 1) & (control[["lnorm"]] != "l1")) {
+            loocv <- TRUE
+        }
+        else {
+            loocv <- FALSE    
+        }
+        
+        if (!loocv) {
+            fold_index <- create_folds(X, folds)
+        }
+        
         C <- matrix(NA, nrow = nrow(X), ncol = B)
     }
     
@@ -128,13 +126,18 @@ stack_rwnn_matrix <- function(X, y, n_hidden = c(), lambda = NULL, B = 100, opti
                 O <- cbind(X, H)
             }
             
-            for (k in seq_len(folds)) {
-                Ok <- matrix(O[-fold_index[[k]], ], ncol = ncol(O))
-                yk <- matrix(y[-fold_index[[k]], ], ncol = ncol(y))
-                beta_b <- estimate_output_weights(Ok, yk, control$lnorm, lambda)$beta
-                
-                Om <- matrix(O[fold_index[[k]], ], ncol = ncol(O))
-                C[fold_index[[k]], b] <- Om %*% beta_b
+            if (loocv) {
+                C[, b] <- loocv(O, y, object_b[["weights"]][["beta"]], lambda[2 - is.null(method)])
+            }
+            else {
+                for (k in seq_len(folds)) {
+                    Ok <- matrix(O[-fold_index[[k]], ], ncol = ncol(O))
+                    yk <- matrix(y[-fold_index[[k]], ], ncol = ncol(y))
+                    beta_b <- estimate_output_weights(Ok, yk, control[["lnorm"]], lambda[2 - is.null(method)])$beta
+                    
+                    Om <- matrix(O[fold_index[[k]], ], ncol = ncol(O))
+                    C[fold_index[[k]], b] <- Om %*% beta_b
+                }
             }
         }
         

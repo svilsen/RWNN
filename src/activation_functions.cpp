@@ -3,16 +3,36 @@
 //[[Rcpp::depends(RcppArmadillo)]]
 
 arma::mat sigmoid(const arma::mat & x) {
-    return 1.0 / (1.0 + arma::exp(-1.0 * x));
+    const int & N = x.n_rows;
+    const int & M = x.n_cols;
+    
+    arma::mat y = x;
+    for (int n = 0; n < N; n++) {
+        for (int m = 0; m < M; m++) {
+            y(n, m) = 1.0 / (1.0 + std::exp(-1.0 * y(n, m)));
+        }
+    }
+    
+    return y;
 }
 
 arma::mat tanh(const arma::mat & x) {
-    return arma::tanh(x);
+    const int & N = x.n_rows;
+    const int & M = x.n_cols;
+    
+    arma::mat y = x;
+    for (int n = 0; n < N; n++) {
+        for (int m = 0; m < M; m++) {
+            y(n, m) = std::tanh(y(n, m));
+        }
+    }
+    
+    return y;
 }
 
 arma::mat relu(const arma::mat & x) {
-    int N = x.n_rows;
-    int M = x.n_cols;
+    const int & N = x.n_rows;
+    const int & M = x.n_cols;
     
     arma::mat y = x;
     for (int n = 0; n < N; n++) {
@@ -27,8 +47,8 @@ arma::mat relu(const arma::mat & x) {
 }
 
 arma::mat sin(const arma::mat & x) {
-    int N = x.n_rows;
-    int M = x.n_cols;
+    const int & N = x.n_rows;
+    const int & M = x.n_cols;
     
     arma::mat y = x;
     for (int n = 0; n < N; n++) {
@@ -41,20 +61,50 @@ arma::mat sin(const arma::mat & x) {
 }
 
 arma::mat silu(const arma::mat & x) {
-    return x / (1.0 + arma::exp(-1.0 * x));
+    const int & N = x.n_rows;
+    const int & M = x.n_cols;
+    
+    arma::mat y = x;
+    for (int n = 0; n < N; n++) {
+        for (int m = 0; m < M; m++) {
+            y(n, m) = y(n, m) / (1.0 + std::exp(-1.0 * y(n, m)));
+        }
+    }
+    
+    return y;
 }
 
 arma::mat softplus(const arma::mat & x) {
-    return arma::log(1.0 + arma::exp(x));
+    const int & N = x.n_rows;
+    const int & M = x.n_cols;
+    
+    arma::mat y = x;
+    for (int n = 0; n < N; n++) {
+        for (int m = 0; m < M; m++) {
+            y(n, m) = std::log(1.0 + std::exp(y(n, m)));
+        }
+    }
+    
+    return y;
 }
 
 arma::mat softsign(const arma::mat & x) {
-    return x / (1.0 + arma::abs(x));
+    const int & N = x.n_rows;
+    const int & M = x.n_cols;
+    
+    arma::mat y = x;
+    for (int n = 0; n < N; n++) {
+        for (int m = 0; m < M; m++) {
+            y(n, m) = y(n, m) / (1.0 + std::abs(y(n, m)));
+        }
+    }
+    
+    return y;
 }
 
 arma::mat sqnl(const arma::mat & x) {
-    int N = x.n_rows;
-    int M = x.n_cols;
+    const int & N = x.n_rows;
+    const int & M = x.n_cols;
     
     arma::mat y = x;
     for (int n = 0; n < N; n++) {
@@ -78,12 +128,22 @@ arma::mat sqnl(const arma::mat & x) {
 }
 
 arma::mat gaussian(const arma::mat & x) {
-    return arma::exp(-1.0 * x * x);
+    const int & N = x.n_rows;
+    const int & M = x.n_cols;
+    
+    arma::mat y = x;
+    for (int n = 0; n < N; n++) {
+        for (int m = 0; m < M; m++) {
+            y(n, m) = std::exp(-1.0 * y(n, m) * y(n, m));
+        }
+    }
+    
+    return y;
 }
 
 arma::mat sqrbf(const arma::mat & x) {
-    int N = x.n_rows;
-    int M = x.n_cols;
+    const int & N = x.n_rows;
+    const int & M = x.n_cols;
     
     arma::mat y = x;
     for (int n = 0; n < N; n++) {
@@ -104,7 +164,17 @@ arma::mat sqrbf(const arma::mat & x) {
 }
 
 arma::mat bentidentity(const arma::mat & x) {
-    return 0.5 * (arma::exp(0.5 * arma::log(x % x + 1.0)) - 1.0) + x;
+    const int & N = x.n_rows;
+    const int & M = x.n_cols;
+    
+    arma::mat y = x;
+    for (int n = 0; n < N; n++) {
+        for (int m = 0; m < M; m++) {
+            y(n, m) = 0.5 * (std::exp(0.5 * std::log(y(n, m) * y(n, m) + 1.0)) - 1.0) + y(n, m);
+        }
+    }
+    
+    return y;
 }
 
 arma::mat identity(const arma::mat & x) {

@@ -45,8 +45,8 @@ bool matrix_condition(const arma::mat & M, const double & x) {
 }
 
 double max_window(const arma::mat & x, const int & w, const int & i) {
-    int l = std::max(i - w, 0);
-    int u = std::max(i - 1, 0);
+    const int l = std::max(i - w, 0);
+    const int u = std::max(i - 1, 0);
     
     double max = x[l];
     for (int i = l; i < u; i++) {
@@ -57,6 +57,47 @@ double max_window(const arma::mat & x, const int & w, const int & i) {
     
     return max;
 }
+
+
+////
+//[[Rcpp::export]]
+arma::colvec loocv(const arma::mat & O, const arma::colvec & y, const arma::colvec & b, const double & lambda) {
+    //
+    const int & N = O.n_rows;
+    const int & p = O.n_cols;
+    
+    //
+    const arma::mat & OT = arma::trans(O);
+    const arma::mat & OTO = OT * O;
+    
+    //
+    arma::mat Oi;
+    if (lambda < 1e-8) {
+        Oi = arma::inv(OTO); 
+    }
+    else {
+        const arma::mat & Ip = lambda * arma::eye(p, p);
+        Oi = arma::inv(OTO + Ip);
+    }
+    
+    //
+    arma::colvec yhat = arma::zeros(N);
+    for (int n = 0; n < N; n++) {
+        const arma::colvec & OT_n = OT.col(n);
+        const double & r_n = y[n] - arma::dot(OT_n, b);
+        
+        const double & h_n = arma::dot(OT_n, Oi * OT_n);
+        const double & e_n = r_n / (1.0 - h_n);
+        
+        const arma::colvec b_n = b - e_n * Oi * OT_n;
+        const double yhat_n = arma::dot(OT_n, b_n);
+        
+        yhat[n] = yhat_n;
+    }
+    
+    return yhat;
+}
+
 
 ////
 //[[Rcpp::export]]
