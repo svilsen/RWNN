@@ -15,7 +15,6 @@ control_rwnn(
   combine_hidden = FALSE,
   include_data = TRUE,
   include_estimate = TRUE,
-  boost_schedule = TRUE,
   rng = runif,
   rng_pars = list(min = -1, max = 1)
 )
@@ -40,8 +39,6 @@ control_rwnn(
 \item{include_data}{TRUE/FALSE: Should the original data be included in the returned object? Note: this should almost always be set to '\code{TRUE}', but using '\code{FALSE}' is more memory efficient in \link{ERWNN-object}'s.}
 
 \item{include_estimate}{TRUE/FALSE: Should the \code{rwnn}-function estimate the output parameters? Note: this should almost always be set to '\code{TRUE}', but using '\code{FALSE}'is more memory efficient in \link{ERWNN-object}'s.}
-
-\item{boost_schedule}{TRUE/FALSE: Should the weights used when gradient boosting be reduced over time?}
 
 \item{rng}{A string indicating the sampling distribution used for generating the weights of the hidden layer (defaults to \code{runif}).}
 

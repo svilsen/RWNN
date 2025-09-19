@@ -127,13 +127,13 @@ stack_rwnn_matrix <- function(X, y, n_hidden = c(), lambda = NULL, B = 100, opti
             }
             
             if (loocv) {
-                C[, b] <- loocv(O, y, object_b[["weights"]][["beta"]], lambda[2 - is.null(method)])
+                C[, b] <- loocv(O, y, object_b[["weights"]][["beta"]], object_b$lambda[length(object_b$lambda)])
             }
             else {
                 for (k in seq_len(folds)) {
                     Ok <- matrix(O[-fold_index[[k]], ], ncol = ncol(O))
                     yk <- matrix(y[-fold_index[[k]], ], ncol = ncol(y))
-                    beta_b <- estimate_output_weights(Ok, yk, control[["lnorm"]], lambda[2 - is.null(method)])$beta
+                    beta_b <- estimate_output_weights(Ok, yk, object_b$lnorm[length(object_b$lnorm)], object_b$lambda[length(object_b$lambda)])$beta
                     
                     Om <- matrix(O[fold_index[[k]], ], ncol = ncol(O))
                     C[fold_index[[k]], b] <- Om %*% beta_b

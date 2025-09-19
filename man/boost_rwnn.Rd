@@ -12,6 +12,7 @@ boost_rwnn(
   lambda = NULL,
   B = 100,
   epsilon = 0.1,
+  schedule = "sqrt",
   method = NULL,
   type = NULL,
   control = list()
@@ -24,6 +25,7 @@ boost_rwnn(
   lambda = NULL,
   B = 100,
   epsilon = 0.1,
+  schedule = "sqrt",
   method = NULL,
   type = NULL,
   control = list()
@@ -41,6 +43,8 @@ boost_rwnn(
 \item{B}{The number of levels used in the boosting tree.}
 
 \item{epsilon}{The learning rate.}
+
+\item{schedule}{The schedule with which the weights are reduced over time. Set to \code{NULL}, \code{"linear"}, \code{"sqrt"}, or \code{"exp"}. If \code{NULL} the weights do not decay.}
 
 \item{method}{The penalisation type passed to \link{ae_rwnn}. Set to \code{NULL} (default), \code{"l1"}, or \code{"l2"}. If \code{NULL}, \link{rwnn} is used as the base learner.}
 

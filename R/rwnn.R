@@ -16,7 +16,6 @@
 #' @param combine_hidden TRUE/FALSE: Should all hidden layers be combined to predict the output?
 #' @param include_data TRUE/FALSE: Should the original data be included in the returned object? Note: this should almost always be set to '\code{TRUE}', but using '\code{FALSE}' is more memory efficient in \link{ERWNN-object}'s.
 #' @param include_estimate TRUE/FALSE: Should the \code{rwnn}-function estimate the output parameters? Note: this should almost always be set to '\code{TRUE}', but using '\code{FALSE}'is more memory efficient in \link{ERWNN-object}'s.
-#' @param boost_schedule TRUE/FALSE: Should the weights used when gradient boosting be reduced over time? 
 #' @param rng A string indicating the sampling distribution used for generating the weights of the hidden layer (defaults to \code{runif}). 
 #' @param rng_pars A list of parameters passed to the \code{rng} function (defaults to \code{list(min = -1, max = 1)}).   
 #' 
@@ -53,7 +52,6 @@ control_rwnn <- function(n_hidden = NULL, n_features = NULL, lnorm = NULL,
                          bias_hidden = TRUE, bias_output = TRUE, activation = NULL, 
                          combine_input = FALSE, combine_hidden = FALSE, 
                          include_data = TRUE, include_estimate = TRUE,
-                         boost_schedule = TRUE, 
                          rng = runif, rng_pars = list(min = -1, max = 1)) {
     #
     if (is.null(lnorm) | !is.character(lnorm)) {
@@ -154,8 +152,8 @@ control_rwnn <- function(n_hidden = NULL, n_features = NULL, lnorm = NULL,
             n_hidden = n_hidden, n_features = n_features, lnorm = lnorm, 
             bias_hidden = bias_hidden, bias_output = bias_output, activation = activation, 
             combine_input = combine_input, combine_hidden = combine_hidden, 
-            include_data = include_data, include_estimate = include_estimate,
-            boost_schedule = boost_schedule, rng = rng, rng_pars = rng_pars
+            include_data = include_data, include_estimate = include_estimate, 
+            rng = rng, rng_pars = rng_pars
         )
     )
 }

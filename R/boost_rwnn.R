@@ -12,6 +12,7 @@
 #' @param lambda The penalisation constant(s) passed to either \link{rwnn} or \link{ae_rwnn} (see \code{method} argument).
 #' @param B The number of levels used in the boosting tree.
 #' @param epsilon The learning rate.
+#' @param schedule The schedule with which the weights are reduced over time. Set to \code{NULL}, \code{"linear"}, \code{"sqrt"}, or \code{"exp"}. If \code{NULL} the weights do not decay.
 #' @param method The penalisation type passed to \link{ae_rwnn}. Set to \code{NULL} (default), \code{"l1"}, or \code{"l2"}. If \code{NULL}, \link{rwnn} is used as the base learner.
 #' @param type A string indicating whether this is a regression or classification problem. 
 #' @param control A list of additional arguments passed to the \link{control_rwnn} function.
@@ -21,11 +22,11 @@
 #' @references Friedman J.H. (2001) "Greedy function approximation: A gradient boosting machine." \emph{The Annals of Statistics}, 29, 1189-1232.
 #' 
 #' @export
-boost_rwnn <- function(formula, data = NULL, n_hidden = c(), lambda = NULL, B = 100, epsilon = 0.1, method = NULL, type = NULL, control = list()) {
+boost_rwnn <- function(formula, data = NULL, n_hidden = c(), lambda = NULL, B = 100, epsilon = 0.1, schedule = "sqrt", method = NULL, type = NULL, control = list()) {
     UseMethod("boost_rwnn")
 }
 
-boost_rwnn_matrix <- function(X, y, n_hidden = c(), lambda = NULL, B = 100, epsilon = 0.1, method = NULL, type = NULL, control = list()) {
+boost_rwnn_matrix <- function(X, y, n_hidden = c(), lambda = NULL, B = 100, epsilon = 0.1, schedule = "sqrt", method = NULL, type = NULL, control = list()) {
     ## Checks
     if (is.null(control[["include_data"]])) {
         control$include_data <- FALSE
@@ -60,11 +61,28 @@ boost_rwnn_matrix <- function(X, y, n_hidden = c(), lambda = NULL, B = 100, epsi
     }
     
     ##
-    if (control$boost_schedule) {
-        w <- epsilon / sqrt(seq(1, B))
+    #
+    if (is.null(schedule)) {
+        w <- epsilon * rep(1, B)
     }
     else {
-        w <- epsilon * rep(1, B)
+        if (is.character(schedule)) {
+            if (schedule == "linear") {
+                w <- epsilon / seq(1, B)
+            }
+            else if (schedule == "sqrt") {
+                w <- epsilon / sqrt(seq(1, B))
+            }
+            else if (schedule == "exp") {
+                w <- epsilon * exp(-seq(0, B - 1))
+            }
+            else {
+                w <- epsilon * rep(1, B)
+            }
+        }
+        else {
+            stop("If 'schedule' is not set to 'NULL', then it should be a string; either 'linear', 'sqrt', or 'exp'.")
+        }
     }
     
     ##
@@ -112,7 +130,7 @@ boost_rwnn_matrix <- function(X, y, n_hidden = c(), lambda = NULL, B = 100, epsi
 #' @example inst/examples/boostrwnn_example.R
 #' 
 #' @export
-boost_rwnn.formula <- function(formula, data = NULL, n_hidden = c(), lambda = NULL, B = 100, epsilon = 0.1, method = NULL, type = NULL, control = list()) {
+boost_rwnn.formula <- function(formula, data = NULL, n_hidden = c(), lambda = NULL, B = 100, epsilon = 0.1, schedule = "sqrt", method = NULL, type = NULL, control = list()) {
     # Checks for 'n_hidden'
     if (length(n_hidden) < 1) {
         stop("When the number of hidden layers is 0, or left 'NULL', the RWNN reduces to a linear model, see ?lm.")
@@ -202,7 +220,7 @@ boost_rwnn.formula <- function(formula, data = NULL, n_hidden = c(), lambda = NU
     }
     
     #
-    mm <- boost_rwnn_matrix(X, y, n_hidden = n_hidden, lambda = lambda, B = B, epsilon = epsilon, method = method, type = type, control = control)
+    mm <- boost_rwnn_matrix(X, y, n_hidden = n_hidden, lambda = lambda, B = B, epsilon = epsilon, schedule = schedule, method = method, type = type, control = control)
     mm$formula <- if (keep_formula) formula
     return(mm)
 }
