@@ -44,7 +44,7 @@ boost_rwnn(
 
 \item{epsilon}{The learning rate.}
 
-\item{schedule}{The schedule with which the weights are reduced over time. Set to \code{NULL}, \code{"linear"}, \code{"sqrt"}, or \code{"exp"}. If \code{NULL} the weights do not decay.}
+\item{schedule}{The schedule with which the weights are reduced over time. Set to \code{NULL}, \code{"linear"}, \code{"sqrt"}, or \code{"exp"} see details for more information.}
 
 \item{method}{The penalisation type passed to \link{ae_rwnn}. Set to \code{NULL} (default), \code{"l1"}, or \code{"l2"}. If \code{NULL}, \link{rwnn} is used as the base learner.}
 
@@ -57,6 +57,15 @@ An \link{ERWNN-object}.
 }
 \description{
 Use gradient boosting to create ensemble random weight neural network models.
+}
+\details{
+#' The gradient booting weights are dependent on both the learning rate, \eqn{\varepsilon}, the number of models included in the ensemble, \eqn{B}, and the choice of \code{schedule}:
+\describe{
+    \item{\code{NULL}}{\deqn{w_b = \varepsilon}}
+    \item{\code{"linear"}}{\deqn{w_b = \frac{\varepsilon}{b}}}
+    \item{\code{"sqrt"}}{\deqn{w_b = \frac{\varepsilon}{\sqrt{b}}}}
+    \item{\code{"exp"}}{\deqn{w_b = \varepsilon \exp{-(b - 1)}}}
+}
 }
 \examples{
 n_hidden <- 10

@@ -67,11 +67,6 @@ The possible activation functions supplied to '\code{activation}' are:
     \item{\code{"sqrbf"}}{\deqn{f(x) = 1 - \frac{x^2}{2}\text{, if }|x| \le 1\text{, }f(x) = \frac{(2 - |x|)^2}{2}\text{, if }1 < |x| < 2\text{, and }f(x) = 0\text{, if }|x| \ge 2}}
 }
 
-If '\code{boost_schedule}' is set to '\code{TRUE}' (default), then the weights applied in a gradient boosting ensemble defined as: 
-\deqn{
- w_b = \frac{\varepsilon}{b}, \text{ for } b = 1, ..., B
-}  
-where \eqn{\varepsilon} is the learning rate, and \eqn{B} is the total number of models in the ensemble.
 
 The '\code{rng}' argument can also be set to \code{"orthogonal"}, \code{"torus"}, \code{"halton"}, or \code{"sobol"} for added stability. The \code{"torus"}, \code{"halton"}, and \code{"sobol"} are quasi-random number generators, relying on \link[randtoolbox]{torus}, \link[randtoolbox]{halton}, and \link[randtoolbox]{sobol} functions from the \link{randtoolbox} package. NB: this is not recommended when creating ensembles.
 }

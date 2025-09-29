@@ -12,10 +12,19 @@
 #' @param lambda The penalisation constant(s) passed to either \link{rwnn} or \link{ae_rwnn} (see \code{method} argument).
 #' @param B The number of levels used in the boosting tree.
 #' @param epsilon The learning rate.
-#' @param schedule The schedule with which the weights are reduced over time. Set to \code{NULL}, \code{"linear"}, \code{"sqrt"}, or \code{"exp"}. If \code{NULL} the weights do not decay.
+#' @param schedule The schedule with which the weights are reduced over time. Set to \code{NULL}, \code{"linear"}, \code{"sqrt"}, or \code{"exp"} see details for more information.
 #' @param method The penalisation type passed to \link{ae_rwnn}. Set to \code{NULL} (default), \code{"l1"}, or \code{"l2"}. If \code{NULL}, \link{rwnn} is used as the base learner.
 #' @param type A string indicating whether this is a regression or classification problem. 
 #' @param control A list of additional arguments passed to the \link{control_rwnn} function.
+#' 
+#' @details
+#' #' The gradient booting weights are dependent on both the learning rate, \eqn{\varepsilon}, the number of models included in the ensemble, \eqn{B}, and the choice of \code{schedule}:
+#' \describe{
+#'     \item{\code{NULL}}{\deqn{w_b = \varepsilon}}
+#'     \item{\code{"linear"}}{\deqn{w_b = \frac{\varepsilon}{b}}}
+#'     \item{\code{"sqrt"}}{\deqn{w_b = \frac{\varepsilon}{\sqrt{b}}}}
+#'     \item{\code{"exp"}}{\deqn{w_b = \varepsilon \exp{-(b - 1)}}}
+#' }
 #' 
 #' @return An \link{ERWNN-object}.
 #' 

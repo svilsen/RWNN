@@ -35,11 +35,6 @@
 #'     \item{\code{"sqrbf"}}{\deqn{f(x) = 1 - \frac{x^2}{2}\text{, if }|x| \le 1\text{, }f(x) = \frac{(2 - |x|)^2}{2}\text{, if }1 < |x| < 2\text{, and }f(x) = 0\text{, if }|x| \ge 2}}
 #' }
 #' 
-#' If '\code{boost_schedule}' is set to '\code{TRUE}' (default), then the weights applied in a gradient boosting ensemble defined as: 
-#' \deqn{
-#'  w_b = \frac{\varepsilon}{b}, \text{ for } b = 1, ..., B
-#' }  
-#' where \eqn{\varepsilon} is the learning rate, and \eqn{B} is the total number of models in the ensemble.
 #' 
 #' The '\code{rng}' argument can also be set to \code{"orthogonal"}, \code{"torus"}, \code{"halton"}, or \code{"sobol"} for added stability. The \code{"torus"}, \code{"halton"}, and \code{"sobol"} are quasi-random number generators, relying on \link[randtoolbox]{torus}, \link[randtoolbox]{halton}, and \link[randtoolbox]{sobol} functions from the \link{randtoolbox} package. NB: this is not recommended when creating ensembles. 
 #' 
@@ -98,11 +93,6 @@ control_rwnn <- function(n_hidden = NULL, n_features = NULL, lnorm = NULL,
     #
     if (!is.logical(include_estimate)) {
         stop("'include_estimate' has to be 'TRUE'/'FALSE'.")
-    }
-    
-    #
-    if (!is.logical(boost_schedule)) {
-        stop("'boost_schedule' has to be 'TRUE'/'FALSE'.")
     }
     
     #
@@ -327,7 +317,7 @@ rwnn_matrix <- function(X, y, n_hidden = c(), lambda = 0, type = NULL, control =
 rwnn.formula <- function(formula, data = NULL, n_hidden = c(), lambda = 0, type = NULL, control = list()) {
     # Checks for 'n_hidden'
     if (length(n_hidden) < 1) {
-        stop("When the number of hidden layers is 0, or left 'NULL', the RWNN reduces to a linear model, see ?lm.")
+        stop("When the number of hidden layers is 0, or left 'NULL', the RWNN reduces to a linear or penalised linear model, see ?stats::lm or ?glmnet::glmnet, respectively.")
     }
     
     if (any(!is.numeric(n_hidden))) {
