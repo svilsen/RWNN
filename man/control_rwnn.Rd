@@ -20,7 +20,7 @@ control_rwnn(
 )
 }
 \arguments{
-\item{n_hidden}{A vector of integers designating the number of neurons in each of the hidden layers (the length of the list is taken as the number of hidden layers).}
+\item{n_hidden}{A vector of integers designating the number of neurons in each of the hidden layers (the length of the list is taken as the number of hidden layers) - should, in most cases, be left as \code{NULL} (see details).}
 
 \item{n_features}{The number of randomly chosen features in the RWNN model. Note: This is meant for use in \link{bag_rwnn}, and it is not recommended outside of that function.}
 
@@ -51,6 +51,8 @@ A list of control variables.
 A function used to create a control-object for the \link{rwnn} function.
 }
 \details{
+The argument '\code{n_hidden}' is used to ensure the size of the hidden bias's and activation's have the correct size; if it is specified through this control function, it will be overwritten by the '\code{n_hidden}' argument passed to the \code{*_rwnn} function. Thus, in most cases it should be left as \code{NULL}.
+
 The possible activation functions supplied to '\code{activation}' are:
 \describe{
     \item{\code{"identity"}}{\deqn{f(x) = x}}

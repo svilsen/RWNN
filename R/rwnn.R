@@ -6,7 +6,7 @@
 #' 
 #' @description A function used to create a control-object for the \link{rwnn} function.
 #' 
-#' @param n_hidden A vector of integers designating the number of neurons in each of the hidden layers (the length of the list is taken as the number of hidden layers).
+#' @param n_hidden A vector of integers designating the number of neurons in each of the hidden layers (the length of the list is taken as the number of hidden layers) - should, in most cases, be left as \code{NULL} (see details).
 #' @param n_features The number of randomly chosen features in the RWNN model. Note: This is meant for use in \link{bag_rwnn}, and it is not recommended outside of that function. 
 #' @param lnorm A string indicating the type of regularisation used when estimating the weights in the output layer, \code{"l1"} or \code{"l2"} (default).
 #' @param bias_hidden A vector of TRUE/FALSE values. The vector should have length 1, or be equal to the number of hidden layers.
@@ -19,7 +19,9 @@
 #' @param rng A string indicating the sampling distribution used for generating the weights of the hidden layer (defaults to \code{runif}). 
 #' @param rng_pars A list of parameters passed to the \code{rng} function (defaults to \code{list(min = -1, max = 1)}).   
 #' 
-#' @details The possible activation functions supplied to '\code{activation}' are:
+#' @details The argument '\code{n_hidden}' is used to ensure the size of the hidden bias's and activation's have the correct size; if it is specified through this control function, it will be overwritten by the '\code{n_hidden}' argument passed to the \code{*_rwnn} function. Thus, in most cases it should be left as \code{NULL}.
+#' 
+#' The possible activation functions supplied to '\code{activation}' are:
 #' \describe{
 #'     \item{\code{"identity"}}{\deqn{f(x) = x}}
 #'     \item{\code{"bentidentity"}}{\deqn{f(x) = \frac{\sqrt{x^2 + 1} - 1}{2} + x}}
